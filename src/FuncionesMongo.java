@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 import org.bson.BasicBSONObject;
 import org.bson.Document;
@@ -151,11 +152,42 @@ public class FuncionesMongo {
 		Document auxSet = new Document("$set", cambios);
 		colleccionVuelos.updateOne(quienCambio, auxSet);
 
-		Document cambios2 = new Document("dni", asiento).append("dni", dniPasajero).append("codigoVenta", codigoVenta);
+		Document cambios2 = new Document("dni", dniPasajero).append("codigoVenta", codigoVenta);
 		Document auxSet1 = new Document("vendidos", cambios2);
 		Document auxSet2 = new Document("$pull", auxSet1);
 		colleccionVuelos.updateOne(quienCambio, auxSet2);
 		System.out.println("Eliminar");
+
+	}
+	protected static void modificarVuelo(String vuelo, String dniPasajero, String codigoVenta) {
+
+
+		MongoDatabase db = mongo.getDatabase("VuelosAmpliada");
+		MongoCollection colleccionVuelos = db.getCollection("vuelo");
+
+		Document quienCambio = new Document("codigo", vuelo);
+	
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Datos a modificar: ");
+		System.out.println("Apellido:");
+		String apellido = sc.nextLine();
+		System.out.println("Nombre:");
+		String nombre = sc.nextLine();
+		System.out.println("DNI de que ha comprado el vuelo:");
+		String dniPagador = sc.nextLine();
+		System.out.println("Tarjeta:");
+		String tarjeta = sc.nextLine();
+		System.out.println("DNI pasajero:");
+		String dniPasajeroCambio = sc.nextLine();
+		
+		Document cambios2 = new Document("dni", dniPasajeroCambio).append("apellido", apellido).append("nombre", nombre).append("dniPagador", dniPagador).append("tarjeta", tarjeta);
+		Document auxSet1 = new Document("vendidos", cambios2);
+		Document auxSet2 = new Document("$set", auxSet1);
+		colleccionVuelos.updateOne(quienCambio, auxSet2);
+		System.out.println("Modificado");
+		
+		
+		
 
 	}
 
