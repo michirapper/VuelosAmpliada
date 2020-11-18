@@ -55,7 +55,9 @@ public class main extends FuncionesMongo {
 			String dniPasajero = sc.nextLine();
 			System.out.println("Codigo de venta del pasajero");
 			String codigoVenta = sc.nextLine();
+			
 			modificarVuelo(vuelo, dniPasajero, codigoVenta);
+			//asientoDeSiempre("IB706", "44556677H");
 		}
 
 	}

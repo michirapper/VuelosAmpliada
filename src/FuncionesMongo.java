@@ -24,6 +24,7 @@ public class FuncionesMongo {
 	static MongoClient mongo = crearConexion();
 	static ArrayList asientosOcupped = new ArrayList(200);
 	static ArrayList asientosFree = new ArrayList(200);
+	//static String asientoDeSiempre = "";
 
 	public static MongoClient crearConexion() {
 		MongoClient mongo = null;
@@ -159,14 +160,14 @@ public class FuncionesMongo {
 		System.out.println("Eliminar");
 
 	}
-	protected static void modificarVuelo(String vuelo, String dniPasajero, String codigoVenta) {
 
+	protected static void modificarVuelo(String vuelo, String dniPasajero, String codigoVenta) {
 
 		MongoDatabase db = mongo.getDatabase("VuelosAmpliada");
 		MongoCollection colleccionVuelos = db.getCollection("vuelo");
+		int asiento = asientoDeSiempre(vuelo, dniPasajero);
+		borrarVuelo(vuelo, dniPasajero, codigoVenta);
 
-		Document quienCambio = new Document("codigo", vuelo);
-	
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Datos a modificar: ");
 		System.out.println("Apellido:");
@@ -179,16 +180,60 @@ public class FuncionesMongo {
 		String tarjeta = sc.nextLine();
 		System.out.println("DNI pasajero:");
 		String dniPasajeroCambio = sc.nextLine();
-		
-		Document cambios2 = new Document("dni", dniPasajeroCambio).append("apellido", apellido).append("nombre", nombre).append("dniPagador", dniPagador).append("tarjeta", tarjeta);
-		Document auxSet1 = new Document("vendidos", cambios2);
-		Document auxSet2 = new Document("$set", auxSet1);
-		colleccionVuelos.updateOne(quienCambio, auxSet2);
-		System.out.println("Modificado");
-		
-		
-		
 
+		anadirActualizacion(vuelo, dniPasajeroCambio, nombre, apellido, dniPagador, tarjeta, asiento, codigoVenta);
+
+		System.out.println("Modificado");
+
+	}
+
+	protected static void anadirActualizacion(String vuelo, String dniPasajero, String nombre, String apellido,
+			String dniPagador, String tarjeta, int asiento, String codigoVenta) {
+
+		//asiento = asientoDeSiempre;
+		MongoDatabase db = mongo.getDatabase("VuelosAmpliada");
+		MongoCollection colleccionVuelos = db.getCollection("vuelo");
+
+		Document quienCambio = new Document("codigo", vuelo);
+
+		Document cambios2 = new Document("asiento", asiento).append("dni", dniPasajero).append("apellido", apellido)
+				.append("nombre", nombre).append("dniPagador", dniPagador).append("tarjeta", tarjeta)
+				.append("codigoVenta", codigoVenta);
+		Document auxSet1 = new Document("vendidos", cambios2);
+		Document auxSet2 = new Document("$push", auxSet1);
+		colleccionVuelos.updateOne(quienCambio, auxSet2);
+
+	}
+
+	protected static int asientoDeSiempre(String vuelo, String dni) {
+		// Document findDocument = new Document("codigo", "IB706");
+		DB db = mongo.getDB("VuelosAmpliada");
+		DBCollection colleccionVuelos = db.getCollection("vuelo");
+		DBCursor cur = colleccionVuelos.find(new BasicDBObject("codigo", vuelo));
+		String vendidos = "";
+
+		while (cur.hasNext()) {
+			vendidos = cur.next().get("vendidos").toString();
+
+		}
+		// System.out.println(vendidos);
+
+		JSONArray jsonArray = new JSONArray(vendidos);
+
+		return cogerAsientoDeSiempre(jsonArray, dni);
+
+	}
+
+	public static int cogerAsientoDeSiempre(JSONArray jsonArrayy, String dni) {
+		String asientoDeSiempre = "";
+		for (int i = 0; i < jsonArrayy.length(); i++) {
+			JSONObject json = jsonArrayy.getJSONObject(i);
+			if (dni.equals(json.get("dni"))) {
+				asientoDeSiempre = json.get("asiento").toString();
+			}
+		}
+		
+		return Integer.parseInt(asientoDeSiempre);
 	}
 
 }
