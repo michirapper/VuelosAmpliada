@@ -1,4 +1,7 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 
 import org.bson.BasicBSONObject;
@@ -14,10 +17,12 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-
+import org.json.*;
 
 public class FuncionesMongo {
 	static MongoClient mongo = crearConexion();
+	static ArrayList asientosOcupped = new ArrayList(200);
+	static ArrayList asientosFree = new ArrayList(200);
 
 	public static MongoClient crearConexion() {
 		MongoClient mongo = null;
@@ -50,6 +55,7 @@ public class FuncionesMongo {
 		String codigoVenta = doCodigoVenta();
 		String plazas_disponibles = buscar(vuelo);
 		int PlazasD = Integer.parseInt(plazas_disponibles) - 1;
+		int asiento = asientos(vuelo);
 
 		MongoDatabase db = mongo.getDatabase("VuelosAmpliada");
 		MongoCollection colleccionVuelos = db.getCollection("vuelo");
@@ -58,8 +64,14 @@ public class FuncionesMongo {
 		Document cambios = new Document("plazas_disponibles", PlazasD);
 		Document auxSet = new Document("$set", cambios);
 		colleccionVuelos.updateOne(quienCambio, auxSet);
-		System.out.println(PlazasD);
-		
+
+		Document cambios2 = new Document("asiento", asiento).append("dni", dniPasajero).append("apellido", apellido)
+				.append("nombre", nombre).append("dniPagador", dniPagador).append("tarjeta", tarjeta)
+				.append("codigoVenta", codigoVenta);
+		Document auxSet1 = new Document("vendidos", cambios2);
+		Document auxSet2 = new Document("$push", auxSet1);
+		colleccionVuelos.updateOne(quienCambio, auxSet2);
+		System.out.println("Su codigo de venta es: " + codigoVenta);
 
 	}
 
@@ -80,12 +92,50 @@ public class FuncionesMongo {
 		DB db = mongo.getDB("VuelosAmpliada");
 		DBCollection colleccionVuelos = db.getCollection("vuelo");
 		DBCursor cur = colleccionVuelos.find(new BasicDBObject("codigo", Codvuelo));
+		String Pdisponibles = "";
 
 		while (cur.hasNext()) {
-			Codvuelo = cur.next().get("plazas_disponibles").toString();
+			Pdisponibles = cur.next().get("plazas_disponibles").toString();
 		}
-		return Codvuelo;
+		return Pdisponibles;
 
+	}
+
+	protected static int asientos(String vuelo) {
+		// Document findDocument = new Document("codigo", "IB706");
+		DB db = mongo.getDB("VuelosAmpliada");
+		DBCollection colleccionVuelos = db.getCollection("vuelo");
+		DBCursor cur = colleccionVuelos.find(new BasicDBObject("codigo", vuelo));
+		String vendidos = "";
+
+		while (cur.hasNext()) {
+			vendidos = cur.next().get("vendidos").toString();
+
+		}
+		// System.out.println(vendidos);
+
+		JSONArray jsonArray = new JSONArray(vendidos);
+		CargarArray(jsonArray);
+		
+		
+		for (int i = 1; i < 200; i++) {
+			asientosFree.add(i);
+		}
+		//Compara Arrays y da los libres
+		asientosFree.removeAll(asientosOcupped);
+
+		Object[] asientoLibre = asientosFree.toArray();
+		//System.out.println(asientoLibre[0]);
+		int asiento = (Integer) asientoLibre[0];
+		return asiento;
+		
+	}
+
+	public static void CargarArray(JSONArray jsonArrayy) {
+		for (int i = 0; i < jsonArrayy.length(); i++) {
+			JSONObject json = jsonArrayy.getJSONObject(i);
+			asientosOcupped.add(json.get("asiento"));
+		}
 	}
 
 }

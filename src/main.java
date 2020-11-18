@@ -11,7 +11,7 @@ public class main extends FuncionesMongo {
 		
 		Scanner sc = new Scanner(System.in);
 	//	int num = sc.nextInt();
-		int num = 1;
+		int num = 2;
 		System.out.println("1- Comprar Vuelo");
 		if (num == 1) {
 			verVuelos(mongo);
@@ -29,6 +29,7 @@ public class main extends FuncionesMongo {
 			System.out.println("Tarjeta de credito:");
 			String tarjeta = sc.nextLine();
 			comprarVuelo(vuelo, dniPasajero, nombre, apellido, dniPagador, tarjeta);
+		}else if(num == 2) {
 			
 		}
 
