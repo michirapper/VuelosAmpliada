@@ -116,19 +116,18 @@ public class FuncionesMongo {
 
 		JSONArray jsonArray = new JSONArray(vendidos);
 		CargarArray(jsonArray);
-		
-		
+
 		for (int i = 1; i < 200; i++) {
 			asientosFree.add(i);
 		}
-		//Compara Arrays y da los libres
+		// Compara Arrays y da los libres
 		asientosFree.removeAll(asientosOcupped);
 
 		Object[] asientoLibre = asientosFree.toArray();
-		//System.out.println(asientoLibre[0]);
+		// System.out.println(asientoLibre[0]);
 		int asiento = (Integer) asientoLibre[0];
 		return asiento;
-		
+
 	}
 
 	public static void CargarArray(JSONArray jsonArrayy) {
@@ -136,6 +135,28 @@ public class FuncionesMongo {
 			JSONObject json = jsonArrayy.getJSONObject(i);
 			asientosOcupped.add(json.get("asiento"));
 		}
+	}
+
+	protected static void borrarVuelo(String vuelo, String dniPasajero, String codigoVenta) {
+
+		String plazas_disponibles = buscar(vuelo);
+		int PlazasD = Integer.parseInt(plazas_disponibles) + 1;
+		int asiento = asientos(vuelo);
+
+		MongoDatabase db = mongo.getDatabase("VuelosAmpliada");
+		MongoCollection colleccionVuelos = db.getCollection("vuelo");
+
+		Document quienCambio = new Document("codigo", vuelo);
+		Document cambios = new Document("plazas_disponibles", PlazasD);
+		Document auxSet = new Document("$set", cambios);
+		colleccionVuelos.updateOne(quienCambio, auxSet);
+
+		Document cambios2 = new Document("dni", asiento).append("dni", dniPasajero).append("codigoVenta", codigoVenta);
+		Document auxSet1 = new Document("vendidos", cambios2);
+		Document auxSet2 = new Document("$pull", auxSet1);
+		colleccionVuelos.updateOne(quienCambio, auxSet2);
+		System.out.println("Eliminar");
+
 	}
 
 }

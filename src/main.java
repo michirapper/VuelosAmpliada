@@ -30,7 +30,15 @@ public class main extends FuncionesMongo {
 			String tarjeta = sc.nextLine();
 			comprarVuelo(vuelo, dniPasajero, nombre, apellido, dniPagador, tarjeta);
 		}else if(num == 2) {
-			
+			verVuelos(mongo);
+			System.out.println("Elija un vuelo:");
+			String vuelo = sc.nextLine();
+			System.out.println("Inserte sus datos: ");
+			System.out.println("DNI del pasajero:");
+			String dniPasajero = sc.nextLine();
+			System.out.println("Codigo de venta del pasajero");
+			String codigoVenta = sc.nextLine();
+			borrarVuelo(vuelo, dniPasajero, codigoVenta);
 		}
 
 	}
