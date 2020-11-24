@@ -56,24 +56,29 @@ public class FuncionesMongo {
 			String dniPagador, String tarjeta) {
 		String codigoVenta = doCodigoVenta();
 		String plazas_disponibles = buscar(vuelo);
-		int PlazasD = Integer.parseInt(plazas_disponibles) - 1;
-		int asiento = asientos(vuelo);
+		if (Integer.parseInt(plazas_disponibles) == 0) {
+			System.out.println("No hay asientos disponibles");
+		}else {
+			int PlazasD = Integer.parseInt(plazas_disponibles) - 1;
+			int asiento = asientos(vuelo);
 
-		MongoDatabase db = mongo.getDatabase("VuelosAmpliada");
-		MongoCollection colleccionVuelos = db.getCollection("vuelo");
+			MongoDatabase db = mongo.getDatabase("VuelosAmpliada");
+			MongoCollection colleccionVuelos = db.getCollection("vuelo");
 
-		Document quienCambio = new Document("codigo", vuelo);
-		Document cambios = new Document("plazas_disponibles", PlazasD);
-		Document auxSet = new Document("$set", cambios);
-		colleccionVuelos.updateOne(quienCambio, auxSet);
+			Document quienCambio = new Document("codigo", vuelo);
+			Document cambios = new Document("plazas_disponibles", PlazasD);
+			Document auxSet = new Document("$set", cambios);
+			colleccionVuelos.updateOne(quienCambio, auxSet);
 
-		Document cambios2 = new Document("asiento", asiento).append("dni", dniPasajero).append("apellido", apellido)
-				.append("nombre", nombre).append("dniPagador", dniPagador).append("tarjeta", tarjeta)
-				.append("codigoVenta", codigoVenta);
-		Document auxSet1 = new Document("vendidos", cambios2);
-		Document auxSet2 = new Document("$push", auxSet1);
-		colleccionVuelos.updateOne(quienCambio, auxSet2);
-		System.out.println("Su codigo de venta es: " + codigoVenta);
+			Document cambios2 = new Document("asiento", asiento).append("dni", dniPasajero).append("apellido", apellido)
+					.append("nombre", nombre).append("dniPagador", dniPagador).append("tarjeta", tarjeta)
+					.append("codigoVenta", codigoVenta);
+			Document auxSet1 = new Document("vendidos", cambios2);
+			Document auxSet2 = new Document("$push", auxSet1);
+			colleccionVuelos.updateOne(quienCambio, auxSet2);
+			System.out.println("Su codigo de venta es: " + codigoVenta);
+		}
+		
 
 	}
 
